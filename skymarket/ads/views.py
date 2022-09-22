@@ -1,15 +1,70 @@
 from rest_framework import pagination, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
+from ads.models import Ad, Comment
+from ads.serializers import * 
+
+
 
 
 class AdPagination(pagination.PageNumberPagination):
-    pass
+    page_size = 4
+    page_query_param = "page"
+    max_page_size = 100000
 
 
 # TODO view функции. Предлагаем Вам следующую структуру - но Вы всегда можете использовать свою
 class AdViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Ad.objects.all()
+    serializer_class = AdSerializer
+    serializer_action_classes = {
+        'list': AdListSerializer,
+        'retrieve': AdRetrieveSerializer,
+        'create': AdCreateSerializer,
+    }
+    # permission_classes = [IsAuthenticated]
 
+    @action(detail=False, methods=['get'], url_path=r'me')
+    def user_ads(self, request, *args, **kwargs):
+        current_user = self.request.user
+        queryset = Ad.objects.filter(author=current_user)
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_serializer_class(self):
+        try:
+            return self.serializer_action_classes[self.action]
+        except (KeyError, AttributeError):
+            return super().get_serializer_class()
 
 class CommentViewSet(viewsets.ModelViewSet):
-    pass
+    serializer_class = CommentSerializer
+    serializer_action_classes = {
+        'list': CommentListSerializer,
+        # 'retrieve': AdRetrieveSerializer,
+        'create': CommentCreateSerializer,
+    }
+
+    def get_queryset(self):
+        return Comment.objects.filter(ad_id=self.kwargs['ad_id'])
+
+    def get_serializer_class(self):
+        try:
+            return self.serializer_action_classes[self.action]
+        except (KeyError, AttributeError):
+            return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+        ad = Ad.objects.get(pk=self.kwargs['ad_id'])
+        serializer.save(author=self.request.user, ad=ad)
 

@@ -1,9 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 from django.db import models
 from users.managers import UserManager
-from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
-
 
 
 class UserRoles:
@@ -23,11 +21,17 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=50, unique=True)
     image = models.ImageField(upload_to='user_images/', default=None, null=True)
     role = models.CharField(max_length=25, choices=UserRoles.ROLE, default=UserRoles.USER)
-    phone = PhoneNumberField()
+    phone = models.CharField(max_length=20, null=True)
+    is_active = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email' 
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', "role"]
+
+    objects = UserManager()
 
 
     def __str__(self):
-        return self.username
+        return self.first_name
 
     @property
     def is_superuser(self):
@@ -43,11 +47,6 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_admin
 
-    USERNAME_FIELD = 'email' 
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', "role"]
-
-    objects = UserManager()
-
     @property
     def is_admin(self):
         return self.role == UserRoles.ADMIN  
@@ -59,4 +58,7 @@ class User(AbstractBaseUser):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-        # ordering = ['username']
+        ordering = ['email']
+
+    def __str__(self):
+        return self.email
