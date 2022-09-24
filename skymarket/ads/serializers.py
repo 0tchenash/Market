@@ -28,19 +28,21 @@ class CommentListSerializer(serializers.ModelSerializer):
         slug_field='last_name'
     )
 
-    # author_image = serializers.SlugRelatedField(
-    #     source='author',
-    #     many=False,
-    #     queryset=User.objects.all(),
-    #     slug_field='image'
-    # )
+    author_image = serializers.SerializerMethodField('get_author_image_url')
 
     class Meta:
         model = Comment
         fields = ['pk', 'text', 'created_at',
                   'author_id', 'author_first_name', 'author_last_name',
-                  # 'author_image',
+                  'author_image',
                   'ad_id']
+
+    def get_author_image_url(self, obj):
+        request = self.context.get("request")
+        image_url = obj.author.image.url if obj.author.image else '/django_media/user_images/avatar_placeholder.jpg'
+        return request.build_absolute_uri(image_url)
+    
+
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):

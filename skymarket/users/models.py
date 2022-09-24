@@ -19,7 +19,7 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(max_length=50, unique=True)
-    image = models.ImageField(upload_to='user_images/', default=None, null=True)
+    image = models.ImageField(upload_to='user_images/', null=True)
     role = models.CharField(max_length=25, choices=UserRoles.ROLE, default=UserRoles.USER)
     phone = models.CharField(max_length=20, null=True)
     is_active = models.BooleanField(default=False)

@@ -7,9 +7,6 @@ class UserManager(BaseUserManager):
     функция создания пользователя — в нее мы передаем обязательные поля
     """
 
-
-
-
     def create_user(self, email, first_name, last_name, phone, role='user', image=None, last_login=None, password=None):
         if not email:
             raise ValueError('Users must have an email address')
