@@ -5,6 +5,8 @@ from rest_framework.generics import get_object_or_404
 from ads.models import Ad, Comment
 from ads.serializers import * 
 from ads.permissions import UserPermission
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import TitleFilter
 
 
 
@@ -19,6 +21,10 @@ class AdPagination(pagination.PageNumberPagination):
 class AdViewSet(viewsets.ModelViewSet):
     queryset = Ad.objects.all()
     serializer_class = AdSerializer
+    filter_backends = (DjangoFilterBackend,) # Подключаем библотеку, отвечающую за фильтрацию к CBV
+    filterset_class = TitleFilter 
+
+    permission_classes = [UserPermission]
 
     serializer_action_classes = {
         'list': AdListSerializer,
@@ -26,7 +32,7 @@ class AdViewSet(viewsets.ModelViewSet):
         'create': AdCreateSerializer,
         'update': AdCreateSerializer,
     }
-    #permission_classes = [UserPermission]
+
 
     @action(detail=False, methods=['get'], url_path=r'me', serializer_class=AdListSerializer)
     def user_ads(self, request, *args, **kwargs):
@@ -59,7 +65,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         'update': CommentCreateSerializer,
     }
 
-    #permission_classes = (UserPermission)
+    permission_classes = [UserPermission]
 
     def get_queryset(self):
         return Comment.objects.filter(ad_id=self.kwargs['ad_id'])

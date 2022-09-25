@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     # "Swagger",
     "djoser",
     "corsheaders",
@@ -95,7 +96,8 @@ REST_FRAMEWORK = {
 # TODO здесь мы настраиваем Djoser
 DJOSER = {
     'SERIALIZERS': {
-        'user_create': 'users.serializers.UserRegistrationSerializer'
+        'user_create': 'users.serializers.UserRegistrationSerializer',
+        'current_user': 'users.serializers.CurrentUserSerializer',
     },
     'LOGIN_FIELD': 'email'
 }

@@ -3,7 +3,10 @@ from django.db import models
 from users.models import User
 
 
+
 class Ad(models.Model):
+
+
     # TODO добавьте поля модели здесь
     title = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
